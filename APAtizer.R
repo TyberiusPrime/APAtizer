@@ -1,5 +1,5 @@
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
 
 required_packages_R <- c(
   "tidyverse", "base", "data.table", "stats", "shinyalert", "shiny", "purrr",
@@ -27,8 +27,8 @@ install_missing_packages_Bioc <- function(packages) {
     }
   }
 }
-install_missing_packages_R(required_packages_R)
-install_missing_packages_Bioc(required_packages_Bioc)
+# install_missing_packages_R(required_packages_R)
+# install_missing_packages_Bioc(required_packages_Bioc)
 
 library("apeglm")
 library("TCGAbiolinks")

@@ -51,6 +51,7 @@
             "TCGAbiolinks"
             "tidyverse"
             "VennDiagram"
+          "TBX20BamSubset"
           ];
 
     in
