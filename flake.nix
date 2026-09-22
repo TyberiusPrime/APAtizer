@@ -54,8 +54,6 @@
             "TBX20BamSubset"
           ];
 
-      binPrefix = "Apatizer";
-
     in
     {
       devShells = forAllSystems (
@@ -63,8 +61,8 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
 
-          # everything that should be available in the devshell AND on the
-          # PATH of the Apatizer_* wrappers
+          # the APAtizer toolchain (also the input bins of the packages.apatizer
+          # symlink forest)
           devshellPackages = [
             R
             pkgs.snakemake
@@ -92,38 +90,26 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
 
-          # PATH components for the wrappers: the same tools as in the devshell
-          wrapperPath = lib.makeBinPath ([
-            R
-            pkgs.snakemake
-            pkgs.python314Packages.htseq
-            pkgs.python3
-            pkgs.hisat2
-            pkgs.gatk
-          ]);
-
-          # exports R/bin/* as bin/${binPrefix}_*, with PATH set up so that
-          # snakemake, htseq, python, gatk (and R itself) are reachable from
-          # the wrapped R / Rscript
+          # symlink forest of all the tool bins (R, Rscript, snakemake,
+          # htseq-*, python3, hisat2, gatk, ...) in a single bin/ directory
           apatizer =
-            pkgs.runCommand "apatizer-wrapped-R"
+            pkgs.symlinkJoin
               {
-                nativeBuildInputs = [ pkgs.makeWrapper ];
+                name = "apatizer-env";
+                paths = [
+                  R
+                  pkgs.snakemake
+                  pkgs.python314Packages.htseq
+                  pkgs.python3
+                  pkgs.hisat2
+                  pkgs.gatk
+                ];
                 meta = {
-                  description = "R (${binPrefix} wrapper) with the APAtizer toolchain on PATH";
-                  mainProgram = "${binPrefix}_Rscript";
+                  description = "APAtizer toolchain: R with snakemake, htseq, python, hisat2 and gatk";
+                  mainProgram = "Rscript";
                 };
                 passthru = { inherit R; };
-              }
-              ''
-                mkdir -p $out/bin
-                for target in ${R}/bin/*; do
-                  name="$(basename "$target")"
-                  makeWrapper "$target" "$out/bin/${binPrefix}_$name" \
-                    --prefix PATH : '${wrapperPath}' \
-                    --set SHELL ${pkgs.runtimeShell}
-                done
-              '';
+              };
         in
         {
           apatizer = apatizer;
