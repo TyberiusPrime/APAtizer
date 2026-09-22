@@ -71,6 +71,7 @@
             pkgs.python314Packages.htseq
             pkgs.python3
             pkgs.gatk
+            pkgs.hisat2
           ];
         in
         {
@@ -97,6 +98,7 @@
             pkgs.snakemake
             pkgs.python314Packages.htseq
             pkgs.python3
+            pkgs.hisat2
             pkgs.gatk
           ]);
 
