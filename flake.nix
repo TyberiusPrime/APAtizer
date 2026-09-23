@@ -54,6 +54,21 @@
             "TBX20BamSubset"
           ];
 
+      apatizer_build =
+        pkgs:
+        pkgs.stdenv.mkDerivation rec {
+          name = "apatizer";
+          version = "0.1";
+          src = ./.;
+          buildPhase = ''
+            mkdir $out
+            cp ${src}/* $out -r
+            mkdir $out/bin -p
+            printf "#!/bin/sh\necho '$out'" > $out/bin/find_apatizer_source
+            chmod +x $out/bin/find_apatizer_source
+          '';
+        };
+
     in
     {
       devShells = forAllSystems (
@@ -70,6 +85,7 @@
             pkgs.python3
             pkgs.gatk
             pkgs.hisat2
+            (apatizer_build pkgs)
           ];
         in
         {
@@ -92,24 +108,23 @@
 
           # symlink forest of all the tool bins (R, Rscript, snakemake,
           # htseq-*, python3, hisat2, gatk, ...) in a single bin/ directory
-          apatizer =
-            pkgs.symlinkJoin
-              {
-                name = "apatizer-env";
-                paths = [
-                  R
-                  pkgs.snakemake
-                  pkgs.python314Packages.htseq
-                  pkgs.python3
-                  pkgs.hisat2
-                  pkgs.gatk
-                ];
-                meta = {
-                  description = "APAtizer toolchain: R with snakemake, htseq, python, hisat2 and gatk";
-                  mainProgram = "Rscript";
-                };
-                passthru = { inherit R; };
-              };
+          apatizer = pkgs.symlinkJoin {
+            name = "apatizer-env";
+            paths = [
+              R
+              pkgs.snakemake
+              pkgs.python314Packages.htseq
+              pkgs.python3
+              pkgs.hisat2
+              pkgs.gatk
+              (apatizer_build pkgs)
+            ];
+            meta = {
+              description = "APAtizer toolchain: R with snakemake, htseq, python, hisat2 and gatk";
+              mainProgram = "Rscript";
+            };
+            passthru = { inherit R; };
+          };
         in
         {
           apatizer = apatizer;
