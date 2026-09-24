@@ -68,24 +68,22 @@
             chmod +x $out/bin/find_apatizer_source
           '';
         };
+      python_with_pkgs =
+        pkgs:
+        pkgs.python3.withPackages (p: [
+          p.numpy
+          p.scipy
+        ]);
 
     in
-    {
+    rec {
       devShells = forAllSystems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
 
-          # the APAtizer toolchain (also the input bins of the packages.apatizer
-          # symlink forest)
           devshellPackages = [
-            R
-            pkgs.snakemake
-            pkgs.python314Packages.htseq
-            pkgs.python3
-            pkgs.gatk
-            pkgs.hisat2
-            (apatizer_build pkgs)
+            packages.${system}.apatizer
           ];
         in
         {
@@ -114,7 +112,7 @@
               R
               pkgs.snakemake
               pkgs.python314Packages.htseq
-              pkgs.python3
+              (python_with_pkgs pkgs)
               pkgs.hisat2
               pkgs.gatk
               (apatizer_build pkgs)
